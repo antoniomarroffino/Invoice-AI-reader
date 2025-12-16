@@ -1,12 +1,12 @@
 import { useRef, useState } from "react";
 
 type Props = {
-    onFileSelected: (file: File) => void;
+    onExtract: (file: File) => void;
     disabled?: boolean;
 };
 
 export default function InvoiceDropzone({
-                                            onFileSelected,
+                                            onExtract,
                                             disabled = false,
                                         }: Props) {
     const inputRef = useRef<HTMLInputElement>(null);
@@ -19,16 +19,22 @@ export default function InvoiceDropzone({
 
         if (selected.type !== "application/pdf") {
             setError("Only PDF files are allowed");
+            setFile(null);
             return;
         }
 
         setError(null);
         setFile(selected);
-        onFileSelected(selected);
+    };
+
+    const handleExtract = () => {
+        if (!file || disabled) return;
+        onExtract(file);
     };
 
     return (
-        <div className="w-full">
+        <div className="w-full space-y-4">
+            {/* Dropzone */}
             <div
                 className={`flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-10 transition
                 ${
@@ -83,11 +89,26 @@ export default function InvoiceDropzone({
                 )}
             </div>
 
+            {/* Error */}
             {error && (
-                <p className="mt-2 text-sm text-red-600 text-center">
+                <p className="text-center text-sm text-red-600">
                     {error}
                 </p>
             )}
+
+            {/* Action button */}
+            <button
+                onClick={handleExtract}
+                disabled={!file || disabled}
+                className={`w-full rounded-xl px-6 py-3 text-sm font-semibold transition
+                ${
+                    !file || disabled
+                        ? "cursor-not-allowed bg-gray-200 text-gray-400"
+                        : "bg-purple-600 text-white hover:bg-purple-700"
+                }`}
+            >
+                Extract invoice
+            </button>
         </div>
     );
 }

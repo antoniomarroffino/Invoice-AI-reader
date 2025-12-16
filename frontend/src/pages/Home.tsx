@@ -1,6 +1,10 @@
 import InvoiceDropzone from "../components/InvoiceDropzone";
 import PageContainer from "../components/PageContainer";
+import InvoiceResult from "../components/InvoiceResult";
 import { useExtractInvoice } from "../hooks/useExtractInvoice";
+import {Spinner} from "../components/general/Spinner.tsx";
+import {ResultSkeleton} from "../components/general/ResultSkeleton.tsx";
+import {ResultPlaceholder} from "../components/general/ResultPlaceholder.tsx";
 
 export default function Home() {
     const {
@@ -34,19 +38,24 @@ export default function Home() {
                     </h2>
 
                     <InvoiceDropzone
-                        onFileSelected={(file) => extractInvoice(file)}
+                        onExtract={(file) => extractInvoice(file)}
                         disabled={isPending}
                     />
 
+                    {/* Loading */}
                     {isPending && (
-                        <p className="mt-6 text-center text-sm text-blue-600">
+                        <div className="mt-6 flex items-center justify-center gap-2 text-sm text-blue-600">
+                            <Spinner />
                             Extracting invoice data…
-                        </p>
+                        </div>
                     )}
 
+                    {/* Error */}
                     {isError && (
                         <p className="mt-6 text-center text-sm text-red-600">
-                            {error?.message}
+                            {error instanceof Error
+                                ? error.message
+                                : "Unexpected error occurred"}
                         </p>
                     )}
 
@@ -55,47 +64,22 @@ export default function Home() {
                     </p>
                 </div>
 
-                {/* RIGHT — Result / Info */}
+                {/* RIGHT — Result */}
                 <div className="relative rounded-3xl border border-dashed border-gray-300 bg-gray-50 p-10">
-                    <h2 className="mb-4 text-2xl font-bold text-gray-800">
+                    <h2 className="mb-6 text-2xl font-bold text-gray-800">
                         AI extraction result
                     </h2>
 
-                    {/* Result */}
-                    {data ? (
-                        <pre className="overflow-auto rounded-2xl bg-white p-6 text-sm shadow-sm">
-                            {JSON.stringify(data, null, 2)}
-                        </pre>
-                    ) : (
-                        <div className="flex h-full flex-col justify-center">
-                            <div className="rounded-2xl bg-white p-6 shadow-sm">
-                                <p className="mb-3 text-sm font-semibold text-purple-600">
-                                    How it works
-                                </p>
+                    {isPending && !data && (
+                        <ResultSkeleton />
+                    )}
 
-                                <p className="mb-4 text-gray-600">
-                                    Once you upload an invoice, the system will:
-                                </p>
+                    {!isPending && data && (
+                        <InvoiceResult data={data} />
+                    )}
 
-                                <ul className="list-inside list-disc space-y-2 text-gray-600">
-                                    <li>Read the PDF content securely</li>
-                                    <li>
-                                        Identify key invoice fields (amounts, dates,
-                                        supplier)
-                                    </li>
-                                    <li>Normalize the data into a structured format</li>
-                                    <li>
-                                        Return a clean JSON response ready for
-                                        automation
-                                    </li>
-                                </ul>
-
-                                <p className="mt-6 text-sm text-gray-500">
-                                    The extracted data will appear here as soon as
-                                    processing is completed.
-                                </p>
-                            </div>
-                        </div>
+                    {!isPending && !data && !isError && (
+                        <ResultPlaceholder />
                     )}
                 </div>
             </div>
