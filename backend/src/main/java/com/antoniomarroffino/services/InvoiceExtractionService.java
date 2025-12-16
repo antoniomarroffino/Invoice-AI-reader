@@ -1,5 +1,6 @@
 package com.antoniomarroffino.services;
 
+import com.antoniomarroffino.exceptions.InvalidInvoiceFileException;
 import com.antoniomarroffino.models.dto.InvoiceExtractionResultDto;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -9,11 +10,12 @@ import org.jboss.resteasy.reactive.multipart.FileUpload;
 public class InvoiceExtractionService implements IInvoiceExtractionService {
 
     @Inject
-    PdfTextExtractor pdfTextExtractor;
+    IPdfTextExtractor pdfTextExtractor;
 
     @Inject
     AiExtractionService aiExtractionService;
 
+    @Override
     public InvoiceExtractionResultDto extract(FileUpload file) {
 
         validateFile(file);
@@ -26,12 +28,17 @@ public class InvoiceExtractionService implements IInvoiceExtractionService {
     }
 
     private void validateFile(FileUpload file) {
+
         if (file == null || file.filePath() == null) {
-            throw new IllegalArgumentException("Missing invoice file");
+            throw new InvalidInvoiceFileException(
+                    "Missing invoice PDF file"
+            );
         }
 
-        if (!"application/pdf".equals(file.contentType())) {
-            throw new IllegalArgumentException("Only PDF files are supported");
+        if (!"application/pdf".equalsIgnoreCase(file.contentType())) {
+            throw new InvalidInvoiceFileException(
+                    "Only PDF files are supported"
+            );
         }
     }
 }
