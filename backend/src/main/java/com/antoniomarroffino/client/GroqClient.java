@@ -29,7 +29,14 @@ public class GroqClient {
             {
               "model": "%s",
               "messages": [
-                { "role": "user", "content": %s }
+                {
+                  "role": "system",
+                  "content": "You are an AI system specialized in invoice data extraction."
+                },
+                {
+                  "role": "user",
+                  "content": %s
+                }
               ],
               "temperature": 0
             }
@@ -50,7 +57,7 @@ public class GroqClient {
 
             if (response.statusCode() != 200) {
                 throw new AiExtractionException(
-                        "Groq API error: " + response.body()
+                        "Groq API error (" + response.statusCode() + "): " + response.body()
                 );
             }
 

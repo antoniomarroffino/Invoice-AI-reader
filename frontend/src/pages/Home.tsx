@@ -1,7 +1,16 @@
 import InvoiceDropzone from "../components/InvoiceDropzone";
 import PageContainer from "../components/PageContainer";
+import { useExtractInvoice } from "../hooks/useExtractInvoice";
 
 export default function Home() {
+    const {
+        mutate: extractInvoice,
+        data,
+        isPending,
+        isError,
+        error,
+    } = useExtractInvoice();
+
     return (
         <PageContainer>
             {/* Header */}
@@ -25,10 +34,21 @@ export default function Home() {
                     </h2>
 
                     <InvoiceDropzone
-                        onFileSelected={(file) => {
-                            console.log("PDF selected:", file);
-                        }}
+                        onFileSelected={(file) => extractInvoice(file)}
+                        disabled={isPending}
                     />
+
+                    {isPending && (
+                        <p className="mt-6 text-center text-sm text-blue-600">
+                            Extracting invoice data…
+                        </p>
+                    )}
+
+                    {isError && (
+                        <p className="mt-6 text-center text-sm text-red-600">
+                            {error?.message}
+                        </p>
+                    )}
 
                     <p className="mt-6 text-center text-sm text-gray-500">
                         Supported format: PDF · Best results with digital invoices
@@ -41,30 +61,42 @@ export default function Home() {
                         AI extraction result
                     </h2>
 
-                    {/* Placeholder */}
-                    <div className="flex h-full flex-col justify-center">
-                        <div className="rounded-2xl bg-white p-6 shadow-sm">
-                            <p className="mb-3 text-sm font-semibold text-purple-600">
-                                How it works
-                            </p>
+                    {/* Result */}
+                    {data ? (
+                        <pre className="overflow-auto rounded-2xl bg-white p-6 text-sm shadow-sm">
+                            {JSON.stringify(data, null, 2)}
+                        </pre>
+                    ) : (
+                        <div className="flex h-full flex-col justify-center">
+                            <div className="rounded-2xl bg-white p-6 shadow-sm">
+                                <p className="mb-3 text-sm font-semibold text-purple-600">
+                                    How it works
+                                </p>
 
-                            <p className="mb-4 text-gray-600">
-                                Once you upload an invoice, the system will:
-                            </p>
+                                <p className="mb-4 text-gray-600">
+                                    Once you upload an invoice, the system will:
+                                </p>
 
-                            <ul className="list-inside list-disc space-y-2 text-gray-600">
-                                <li>Read the PDF content securely</li>
-                                <li>Identify key invoice fields (amounts, dates, supplier)</li>
-                                <li>Normalize the data into a structured format</li>
-                                <li>Return a clean JSON response ready for automation</li>
-                            </ul>
+                                <ul className="list-inside list-disc space-y-2 text-gray-600">
+                                    <li>Read the PDF content securely</li>
+                                    <li>
+                                        Identify key invoice fields (amounts, dates,
+                                        supplier)
+                                    </li>
+                                    <li>Normalize the data into a structured format</li>
+                                    <li>
+                                        Return a clean JSON response ready for
+                                        automation
+                                    </li>
+                                </ul>
 
-                            <p className="mt-6 text-sm text-gray-500">
-                                The extracted data will appear here as soon as processing is
-                                completed.
-                            </p>
+                                <p className="mt-6 text-sm text-gray-500">
+                                    The extracted data will appear here as soon as
+                                    processing is completed.
+                                </p>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </PageContainer>

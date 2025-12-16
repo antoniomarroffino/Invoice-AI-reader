@@ -77,7 +77,7 @@ public final class JsonUtil {
         try {
             return MAPPER.writeValueAsString(value);
         } catch (Exception e) {
-            throw new AiExtractionException("Failed to escape JSON string", e);
+            throw new RuntimeException("Failed to JSON-escape string", e);
         }
     }
 }
